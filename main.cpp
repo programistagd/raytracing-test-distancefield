@@ -1,0 +1,124 @@
+#include "config.h"
+#include <GL/glew.h>
+#include <iostream>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#include <sstream>
+
+#include "RayTracer.hpp"
+
+sf::Font globalFont;
+
+sf::String toString(float f){
+	std::ostringstream os;
+	os<<f;
+	return os.str();
+}
+
+bool running = true;
+std::string globalError;
+
+int main(int argc, char* argv[]) {
+	std::cout << "Distancefield Ray Tracer\nVersion " << raytrace_df_VERSION_MAJOR << "." << raytrace_df_VERSION_MINOR << "\n";
+
+	if(!globalFont.loadFromFile("FreeSans.ttf")){
+		throw "Font!";
+	}
+
+	sf::ContextSettings ctx;
+	ctx.majorVersion = 3;
+	ctx.minorVersion = 3;
+	sf::RenderWindow window(sf::VideoMode(800, 600), "Raytracer",sf::Style::Default,ctx);
+	//window.setVerticalSyncEnabled(true);
+	GLenum err = glewInit();
+	if (GLEW_OK != err)
+	{
+		std::cerr<<"Error: "<<glewGetErrorString(err)<<std::endl;
+	}
+	std::cout<<"Status: Using GLEW "<<glewGetString(GLEW_VERSION)<<std::endl;
+	{
+		sf::ContextSettings settings = window.getSettings();
+		std::cout<<"OpenGL info\n";
+		std::cout << "version: " << settings.majorVersion << "." << settings.minorVersion << std::endl;
+		std::cout << "depth bits: " << settings.depthBits << std::endl;
+		std::cout << "stencil bits: " << settings.stencilBits << std::endl;
+		std::cout << "antialiasing level: " << settings.antialiasingLevel << std::endl;
+	}
+
+	///initialize game loop
+	float dt = 1.f/60.f;
+	float accumulator=0.f;
+	bool shouldDraw=true;
+	sf::Clock clock;
+	sf::Clock renderTimer;
+	float latency=0;
+	sf::Text latencyText;
+	latencyText.setFont(globalFont);
+	latencyText.setCharacterSize(20);
+	latencyText.setPosition(10, 10);
+	sf::RectangleShape background(sf::Vector2f(60,25));
+	background.setPosition(5, 9);
+	background.setFillColor(sf::Color::Black);
+
+	//initialize components
+	try{
+	RayTracer raytracer;
+
+
+	//start loop
+	while (running && window.isOpen()) {
+		accumulator+=clock.getElapsedTime().asSeconds();
+		clock.restart();
+		if(accumulator>10.0f*dt) accumulator=10.0f*dt;
+		while(accumulator>=dt){
+			accumulator-=dt;
+			sf::Event event;
+			while (window.pollEvent(event))
+			{
+				// "close requested" event: we close the window
+				if (event.type == sf::Event::Closed){
+					window.close();
+				}
+				else if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape){
+					window.close();
+				}
+				else if (event.type == sf::Event::Resized)
+				{
+					// adjust the viewport when the window is resized
+					glViewport(0, 0, event.size.width, event.size.height);
+				}
+				//currentScene->event(inputMgr->processEvent(event));
+			}
+
+			raytracer.update();
+			shouldDraw = true;
+		}
+		if(shouldDraw){
+			renderTimer.restart();
+			window.clear(sf::Color::Black);
+
+			//render
+			raytracer.render();
+
+			latencyText.setString(toString(latency)+"ms");
+			window.draw(background);
+			window.draw(latencyText);
+			window.display();
+			latency = renderTimer.getElapsedTime().asMilliseconds();
+			shouldDraw = false;
+		}else{
+			sf::sleep(sf::milliseconds(1));
+		}
+	}
+
+	}
+	catch(std::string err){
+		std::cerr<<"Error: "<<err<<std::endl;
+	}
+	/*catch(...){
+		std::cerr<<"Unknown exception"<<std::endl;
+	}*/
+
+	if(window.isOpen())	window.close();
+	std::cout<<"Quitted gracefully\n";
+}

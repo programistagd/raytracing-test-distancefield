@@ -1,0 +1,2 @@
+#define raytrace_df_VERSION_MAJOR @raytrace_df_VERSION_MAJOR@
+#define raytrace_df_VERSION_MINOR @raytrace_df_VERSION_MINOR@
