@@ -43,6 +43,21 @@ Intersection intersectSphere(vec3 center, float radius, Ray r){
    return i;
 }
 
+vec3 aabbnormal(vec3 pos, vec3 center){
+   vec3 dif = normalize(pos-center);
+   vec3 point = abs(dif);
+   if(point.x>point.y && point.x>point.z){
+      return vec3(1*sign(point.x),0,0);
+   }
+   if(point.y>point.x && point.y>point.z){
+      return vec3(0,1*sign(point.y),0);
+   }
+   if(point.z>point.y && point.z>point.x){
+      return vec3(0,0,1*sign(point.z));
+   }
+   return vec3(0);
+}
+
 Intersection intersectAABB(vec3 lb,vec3 rt,Ray r){
    // r.dir is unit direction vector of ray
    vec3 dirfrac;
@@ -72,13 +87,13 @@ Intersection intersectAABB(vec3 lb,vec3 rt,Ray r){
    {
       return noIntersect;
    }
-
-   return Intersection(tmin,r.org+tmin*r.dir,vec3(0),vec3(1),0.0);
+   vec3 point = r.org+tmin*r.dir;
+   return Intersection(tmin,point,aabbnormal((lb+rt)*0.5,point),vec3(1),0.0);
 }
 
 
 vec3 castRay(Ray ray){
-   vec3 lightPosition = vec3(-40.0,4.0,-20.0);//TODO uniform
+   vec3 lightPosition = vec3(-50.0,40.0,70.0);//TODO uniform
 
    Intersection intersection;
 
@@ -91,7 +106,7 @@ vec3 castRay(Ray ray){
    }*/
    intersection = intersectAABB(vec3(4,4,4),vec3(12,12,12),ray);
    if(intersection.t>0.0){
-      float ambient = 1.25;
+      float ambient = 0.25;
       vec3 L = normalize(lightPosition - intersection.pos);
       float diffuse = max(dot(intersection.normal, L), 0.0);
       return intersection.color*(ambient+diffuse);
