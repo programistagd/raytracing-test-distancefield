@@ -31,6 +31,22 @@ RayTracer::RayTracer(){
    glBindVertexArray(0);
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+   //prep texture
+   /*glGenTextures(1, &texture3d);
+   glBindTexture(GL_TEXTURE_3D, texture3d);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+   refresh();*/
+
+}
+
+void RayTracer::refresh(){
+   glBindTexture(GL_TEXTURE_3D, texture3d);
+   glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 128, 128, 128, 0, GL_RED,GL_UNSIGNED_BYTE, voxels);
+   glBindTexture(GL_TEXTURE_3D, 0);
 }
 
 void RayTracer::setVec3(const char* name, glm::vec3 vec){
@@ -93,7 +109,7 @@ void RayTracer::update(sf::Window& window){
    player.right = glm::vec3(sin(player.angles.x - 3.14f/2.0f),0,cos(player.angles.x - 3.14f/2.0f));
    player.up = glm::cross( player.right, player.direction );
 
-   player.pos += player.direction*player.speed.y*dt*4.0f+player.right*player.speed.x*dt*4.0f;
+   player.pos += player.direction*(player.speedFactor*player.speed.y*dt)+player.right*(player.speedFactor*player.speed.x*dt);
 }
 
 void RayTracer::event(sf::Event evt){
@@ -111,6 +127,9 @@ void RayTracer::event(sf::Event evt){
          case sf::Keyboard::A:
          player.speed.x=-1.0;
          break;
+         case sf::Keyboard::LShift:
+         player.speedFactor=player.fastSpeed;
+         break;
       }
    }
    else if(evt.type==sf::Event::KeyReleased){
@@ -122,6 +141,9 @@ void RayTracer::event(sf::Event evt){
          case sf::Keyboard::D:
          case sf::Keyboard::A:
          player.speed.x=0;
+         break;
+         case sf::Keyboard::LShift:
+         player.speedFactor=player.normalSpeed;
          break;
       }
    }
