@@ -63,7 +63,6 @@ int main(int argc, char* argv[]) {
 	background.setFillColor(sf::Color::Black);
 
 	glClearColor(0.f,0.f,0.3f,1.0f);
-	glLoadIdentity();
 
 	//initialize components
 	try{
