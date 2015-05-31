@@ -6,6 +6,9 @@
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path);
 
 RayTracer::RayTracer(){
+   voxels = new float[128*128*128];
+   for(int i=0;i<128*128*128;++i) voxels[i]=(i%40)/80.0f+40.0f;
+
    shader = LoadShaders("vertex.glsl","fragment.glsl");
    player.direction = glm::vec3(cos(player.angles.y)*sin(player.angles.x),sin(player.angles.y),cos(player.angles.y)*cos(player.angles.x));
    player.right = glm::vec3(sin(player.angles.x - 3.14f/2.0f),0,cos(player.angles.x - 3.14f/2.0f));
@@ -32,21 +35,24 @@ RayTracer::RayTracer(){
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
    //prep texture
-   /*glGenTextures(1, &texture3d);
+   glEnable(GL_TEXTURE_3D);
+   glGenTextures(1, &texture3d);
    glBindTexture(GL_TEXTURE_3D, texture3d);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-   refresh();*/
+   refresh();
 
 }
 
 void RayTracer::refresh(){
+   glEnable(GL_TEXTURE_3D);
    glBindTexture(GL_TEXTURE_3D, texture3d);
    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 128, 128, 128, 0, GL_RED,GL_UNSIGNED_BYTE, voxels);
    glBindTexture(GL_TEXTURE_3D, 0);
+   glDisable(GL_TEXTURE_3D);
 }
 
 void RayTracer::setVec3(const char* name, glm::vec3 vec){
@@ -58,28 +64,19 @@ void RayTracer::setVec3(const char* name, glm::vec3 vec){
 void RayTracer::render(){
    glUseProgram(shader);
    setVec3("eyePos",player.pos);
-   /*setVec3("direction",player.direction);
-   setVec3("up",player.up);
-   setVec3("right",player.right);*/
-   /*std::cout<<player.pos.x<<" "<<player.pos.y<<" "<<player.pos.z<<" "<<std::endl;
-   std::cout<<player.direction.x<<" "<<player.direction.y<<" "<<player.direction.z<<" "<<std::endl;
-   std::cout<<player.up.x<<" "<<player.up.y<<" "<<player.up.z<<" "<<std::endl;
-   std::cout<<std::endl;*/
+
    glm::mat4 viewMatrix = glm::lookAt(
       glm::vec3(0,0,0),//player.pos,           // Camera is here
       /*player.pos+*/player.direction, // and looks here : at the same position, plus "direction"
       player.up                  // Head is up (set to 0,-1,0 to look upside-down)
    );
-   const float FoV = 60.0f;
-   glm::mat4 projection = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 200.0f);
-   glm::mat4 MVP = projection * viewMatrix * glm::translate(glm::vec3(0,0,1));
-   glm::mat4 matrix = glm::inverse(MVP);
-   /*glm::vec4 test(1,0,0,1);
-   test = glm::normalize(test * matrix);
-   std::cout<<test.x<<" "<<test.y<<" "<<test.z<<" "<<test.w<<std::endl;*/
+
 
    GLuint viewmatid=glGetUniformLocation(shader, "matrix");
-   glUniformMatrix4fv(viewmatid, 1, GL_FALSE, &viewMatrix[0][0]);//FIXME
+   glUniformMatrix4fv(viewmatid, 1, GL_FALSE, &viewMatrix[0][0]);
+
+   glEnable(GL_TEXTURE_3D);
+   glBindTexture(GL_TEXTURE_3D, texture3d);
 
    glEnableVertexAttribArray(0);
    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -95,6 +92,7 @@ void RayTracer::render(){
    glDisableVertexAttribArray(0);
    glBindVertexArray(0);
    glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glDisable(GL_TEXTURE_3D);
 
    sf::Shader::bind(0);
 }
@@ -147,4 +145,8 @@ void RayTracer::event(sf::Event evt){
          break;
       }
    }
+}
+
+RayTracer::~RayTracer(){
+   delete [] voxels;
 }

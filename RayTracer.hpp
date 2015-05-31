@@ -12,8 +12,10 @@ public:
    void update(sf::Window& window);
    void render();
 
-   float voxels[128][128][128];
+   float * voxels;
    void refresh();
+
+   ~RayTracer();
 protected:
    GLuint texture3d;
    GLuint shader;

@@ -1,4 +1,5 @@
 #version 330 core
+uniform sampler3D VolumeTexture;
 uniform vec3 eyePos;
 uniform mat4 matrix;
 //uniform vec3 eyeDir
@@ -64,10 +65,8 @@ vec3 castRay(Ray ray){
    Intersection intersection = intersectAABB(vec3(0,0,0),vec3(128,128,128),ray);
 
    if(intersection.t>=0.0){
-      float ambient = 1.0;//lighting normals TODO
-      vec3 L = normalize(lightPosition - intersection.pos);
-      float diffuse = max(dot(intersection.normal, L), 0.0);
-      color= intersection.color*(ambient+diffuse);
+      vec3 coord = (intersection.pos-vec3(0,0,0))/128.0;
+      color = vec3(texture3d(coord).r);
    }
    return color;
 }
