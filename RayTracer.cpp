@@ -39,7 +39,7 @@ void RayTracer::setVec3(const char* name, glm::vec3 vec){
 void RayTracer::render(){
 
    glUseProgram(shader);
-   //setVec3("eyePos",player.pos);
+   setVec3("eyePos",player.pos);
    /*setVec3("direction",player.direction);
    setVec3("up",player.up);
    setVec3("right",player.right);*/
@@ -48,17 +48,20 @@ void RayTracer::render(){
    std::cout<<player.up.x<<" "<<player.up.y<<" "<<player.up.z<<" "<<std::endl;
    std::cout<<std::endl;*/
    glm::mat4 viewMatrix = glm::lookAt(
-      player.pos,           // Camera is here
-      player.pos+player.direction, // and looks here : at the same position, plus "direction"
+      glm::vec3(0,0,0),//player.pos,           // Camera is here
+      /*player.pos+*/player.direction, // and looks here : at the same position, plus "direction"
       player.up                  // Head is up (set to 0,-1,0 to look upside-down)
    );
    const float FoV = 60.0f;
-   glm::mat4 projection = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 100.0f);
-   glm::mat4 MVP = projection * viewMatrix;
+   glm::mat4 projection = glm::perspective(FoV, 4.0f / 3.0f, 0.1f, 200.0f);
+   glm::mat4 MVP = projection * viewMatrix * glm::translate(glm::vec3(0,0,1));
    glm::mat4 matrix = glm::inverse(MVP);
+   /*glm::vec4 test(1,0,0,1);
+   test = glm::normalize(test * matrix);
+   std::cout<<test.x<<" "<<test.y<<" "<<test.z<<" "<<test.w<<std::endl;*/
 
-   //GLuint viewmatid=glGetUniformLocation(shader, "matrix");
-   //glUniformMatrix4fv(viewmatid, 1, GL_FALSE, &matrix[0][0]);
+   GLuint viewmatid=glGetUniformLocation(shader, "matrix");
+   glUniformMatrix4fv(viewmatid, 1, GL_FALSE, &viewMatrix[0][0]);//FIXME
 
    glEnableVertexAttribArray(0);
    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -80,13 +83,13 @@ void RayTracer::update(sf::Window& window){
    float dt = 1.0f/60.0f;
    sf::Vector2i mouse = sf::Mouse::getPosition(window);
    sf::Mouse::setPosition(sf::Vector2i(800/2,600/2),window);
-   player.angles.x+=1.0*dt*float(800/2-mouse.x);
+   player.angles.x-=1.0*dt*float(800/2-mouse.x);
    player.angles.y+=1.0*dt*float(600/2-mouse.y);
    player.direction = glm::vec3(cos(player.angles.y)*sin(player.angles.x),sin(player.angles.y),cos(player.angles.y)*cos(player.angles.x));
    player.right = glm::vec3(sin(player.angles.x - 3.14f/2.0f),0,cos(player.angles.x - 3.14f/2.0f));
    player.up = glm::cross( player.right, player.direction );
 
-   player.pos += player.direction*player.speed.y*dt*4.0f-player.right*player.speed.x*dt*4.0f;
+   player.pos += player.direction*player.speed.y*dt*4.0f+player.right*player.speed.x*dt*4.0f;
 }
 
 void RayTracer::event(sf::Event evt){

@@ -55,6 +55,7 @@ int main(int argc, char* argv[]) {
 	float latency=0;
 	sf::Text latencyText;
 	latencyText.setFont(globalFont);
+	latencyText.setColor(sf::Color::White);
 	latencyText.setCharacterSize(20);
 	latencyText.setPosition(10, 10);
 	sf::RectangleShape background(sf::Vector2f(60,25));
@@ -62,6 +63,7 @@ int main(int argc, char* argv[]) {
 	background.setFillColor(sf::Color::Black);
 
 	glClearColor(0.f,0.f,0.3f,1.0f);
+	glLoadIdentity();
 
 	//initialize components
 	try{
@@ -103,10 +105,12 @@ int main(int argc, char* argv[]) {
 			//render
 			raytracer.render();
 
+			window.pushGLStates();
 			latencyText.setString(toString(latency)+"ms");
-			
+
 			window.draw(background);
 			window.draw(latencyText);
+			window.popGLStates();
 			window.display();
 			latency = renderTimer.getElapsedTime().asMilliseconds();
 			shouldDraw = false;
