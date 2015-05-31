@@ -1,3 +1,10 @@
+#version 330 core
+uniform vec3 eyePos;
+//uniform mat4 viewMatrix;
+//uniform vec3 eyeDir
+in vec3 outray;
+out vec4 color;
+
 struct Intersection{
       float t;
       vec3 pos;
@@ -44,14 +51,15 @@ vec4 castRay(vec3 pos, vec3 dir){
    return vec4(0.0);
 }
 
-
-uniform vec3 eyePos;
-//uniform vec3 eyeDir
+const float focalLength = 1.0;
 
 void main()
 {
     //vec3 eyePos = vec3(0);//TODO uniform
-    vec3 screenPos = vec3(gl_FragCoord.x*(2.0/800.0)-1.0,gl_FragCoord.y*(2.0/600.0)-1.0,1.0);//TODO lens
-    vec3 direction = normalize(screenPos-eyePos);
-    gl_FragColor = castRay(eyePos,direction);//vec4(screenPos.x,screenPos.y,screenPos.z,1.0);
+    //vec2 screenPos = vec2(gl_FragCoord.x*(1.0/800.0)-0.5,gl_FragCoord.y*(1.0/600.0)-0.5);//,focalLength,1.0);//TODO lens
+    //screenPos = viewMatrix * screenPos;
+    //vec3 point = screenPos.x*right+screenPos.y*up+direction;
+    //vec3 dir = normalize(point);
+    //gl_FragColor = castRay(eyePos,ray.xyz);//vec4(screenPos.x,screenPos.y,screenPos.z,1.0);
+    color = vec4(outray,1.0);//vec4(outray,1.0);
 }

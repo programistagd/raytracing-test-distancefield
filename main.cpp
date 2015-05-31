@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
 	ctx.minorVersion = 3;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Raytracer",sf::Style::Default,ctx);
 	//window.setVerticalSyncEnabled(true);
+	window.setMouseCursorVisible(false);
 	GLenum err = glewInit();
 	if (GLEW_OK != err)
 	{
@@ -60,6 +61,8 @@ int main(int argc, char* argv[]) {
 	background.setPosition(5, 9);
 	background.setFillColor(sf::Color::Black);
 
+	glClearColor(0.f,0.f,0.3f,1.0f);
+
 	//initialize components
 	try{
 	RayTracer raytracer;
@@ -87,20 +90,21 @@ int main(int argc, char* argv[]) {
 					// adjust the viewport when the window is resized
 					glViewport(0, 0, event.size.width, event.size.height);
 				}
-				//currentScene->event(inputMgr->processEvent(event));
+				raytracer.event(event);
 			}
 
-			raytracer.update();
+			raytracer.update(window);
 			shouldDraw = true;
 		}
 		if(shouldDraw){
 			renderTimer.restart();
-			window.clear(sf::Color::Black);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			//render
 			raytracer.render();
 
 			latencyText.setString(toString(latency)+"ms");
+			
 			window.draw(background);
 			window.draw(latencyText);
 			window.display();
