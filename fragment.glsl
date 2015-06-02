@@ -20,16 +20,16 @@ struct Ray{
 
 Intersection noIntersect = Intersection(-1.0,vec3(0),vec3(0),vec3(0),0.0);
 
-bool insideAABB(vec3 lb,vec3 rt,Ray r){//TODO can be optimized by vector ops (+-)
-   if(r.org.x>lb.x && r.org.y>lb.y && r.org.z>lb.z
+bool insideAABB(vec3 lb,vec3 rt,vec3 r){//TODO can be optimized by vector ops (+-)
+   if(r.x>lb.x && r.y>lb.y && r.z>lb.z
       &&
-      r.org.x<rt.x && r.org.y<rt.y && r.org.z<rt.z )
+      r.x<rt.x && r.y<rt.y && r.z<rt.z )
       return true;
    return false;
 }
 
 Intersection intersectAABB(vec3 lb,vec3 rt,Ray r){
-   if(insideAABB(lb,rt,r)){
+   if(insideAABB(lb,rt,r.org)){
       return Intersection(0.1,r.org,vec3(0),vec3(0,1,1),0.0);
    }
    // r.dir is unit direction vector of ray
@@ -71,18 +71,18 @@ vec3 castRay(Ray ray){
    vec3 color=vec3(0);
    Intersection intersection = intersectAABB(vec3(0,0,0),vec3(128,128,128),ray);
    if(intersection.t>=0.0){
-      ray.org = (intersection.pos-corner)/128.0;
+      vec3 coord = (intersection.pos+ray.dir*0.001-corner)/128.0;
       //color = vec3(texture(VolumeTexture,coord).r);
       int steps=0;
       while(steps<100
-         /*&& insideAABB(vec3(0,0,0),vec3(128,128,128),ray)*/
-         && abs(texture(VolumeTexture,ray.org).r)>0.1){//TODO coefficients
-         float dist = texture(VolumeTexture,ray.org).r;
-         ray.org+=ray.dir*dist/128.0;
+         && insideAABB(vec3(0,0,0),vec3(1,1,1),coord)
+         && abs(texture(VolumeTexture,coord).r)>0.1){//TODO coefficients
+         float dist = texture(VolumeTexture,coord).r;
+         coord+=ray.dir*dist/128.0;
          steps++;
       }
       color=vec3(0,0,steps/100.0);
-      if(insideAABB(vec3(0,0,0),vec3(128,128,128),ray) && texture(VolumeTexture,ray.org).r<=0.1){
+      if(insideAABB(vec3(0,0,0),vec3(1,1,1),coord) && texture(VolumeTexture,coord).r<=0.1){
          color = vec3(1,0,0);
       }
    }
