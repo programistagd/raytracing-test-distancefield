@@ -66,7 +66,7 @@ vec3 castRay(Ray ray){
 
    if(intersection.t>=0.0){
       vec3 coord = (intersection.pos-vec3(0,0,0))/128.0;
-      color = vec3(texture3d(coord).r);
+      color = vec3(texture(VolumeTexture,coord).r);
    }
    return color;
 }
