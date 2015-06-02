@@ -7,7 +7,7 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
 
 RayTracer::RayTracer(){
    voxels = new float[128*128*128];
-   for(int i=0;i<128*128*128;++i) voxels[i]=(i%40)/80.0f+40.0f;
+   //for(int i=0;i<128*128*128;++i) voxels[i]=(i%40)/80.0f+40.0f;//filling voxels in main
 
    shader = LoadShaders("vertex.glsl","fragment.glsl");
    player.direction = glm::vec3(cos(player.angles.y)*sin(player.angles.x),sin(player.angles.y),cos(player.angles.y)*cos(player.angles.x));
@@ -43,14 +43,14 @@ RayTracer::RayTracer(){
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-   refresh();
+   refresh();//TODO may not be called but a call has to be guaranteed before first render call (probably)
 
 }
 
 void RayTracer::refresh(){
    glEnable(GL_TEXTURE_3D);
    glBindTexture(GL_TEXTURE_3D, texture3d);
-   glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 128, 128, 128, 0, GL_RED,GL_UNSIGNED_BYTE, voxels);
+   glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 128, 128, 128, 0, GL_RED,GL_FLOAT, voxels);
    glBindTexture(GL_TEXTURE_3D, 0);
    glDisable(GL_TEXTURE_3D);
 }

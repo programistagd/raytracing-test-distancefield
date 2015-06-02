@@ -23,6 +23,7 @@ set(SOURCES
 	main.cpp
    RayTracer.cpp
    loadShaders.cpp
+   Volumes.cpp
 	)
 
 # Define sources and executable

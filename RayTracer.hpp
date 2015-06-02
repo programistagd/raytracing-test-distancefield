@@ -24,7 +24,7 @@ protected:
    struct Player{
       const float normalSpeed=4.f;
       const float fastSpeed=16.f;
-      glm::vec3 pos;
+      glm::vec3 pos=glm::vec3(-5,-5,-5);
       glm::vec3 speed;
       float speedFactor=normalSpeed;
       glm::vec3 direction,right,up;

@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "RayTracer.hpp"
+#include "Volumes.hpp"
 
 sf::Font globalFont;
 
@@ -67,7 +68,8 @@ int main(int argc, char* argv[]) {
 	//initialize components
 	try{
 	RayTracer raytracer;
-
+	Volumes::sphere(raytracer.voxels,128,glm::vec3(64,64,64),70.0);
+	raytracer.refresh();
 
 	//start loop
 	while (running && window.isOpen()) {
