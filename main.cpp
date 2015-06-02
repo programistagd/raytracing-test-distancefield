@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 	//initialize components
 	try{
 	RayTracer raytracer;
-	Volumes::sphere(raytracer.voxels,128,glm::vec3(64,64,64),70.0);
+	Volumes::sphere(raytracer.voxels,128,glm::vec3(64,64,64),55.0);
 	raytracer.refresh();
 
 	//start loop
