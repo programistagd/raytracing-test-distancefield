@@ -71,8 +71,9 @@ int main(int argc, char* argv[]) {
 	RayTracer raytracer;
 	{
 		//Prepare volume
-		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(64, 64, 64), 20.0);
-		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(80, 80, 64), 10.0);
+		Volumes::cuboid(raytracer.voxels, 128, &Volumes::add, glm::vec3(40, 50, 30), glm::vec3(18, 18, 18));
+		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(64, 64, 64), 24.0);
+		Volumes::sphere(raytracer.voxels, 128, &Volumes::remove, glm::vec3(80, 80, 64), 20.0);
 		raytracer.refresh();
 		raytracer.setViewport(WIDTH, HEIGHT);
 	}

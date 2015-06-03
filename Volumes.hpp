@@ -10,5 +10,6 @@ namespace Volumes{
 
 	//Shapes
 	void sphere(float* voxels, int size, std::function<void(float*, int, int, int, int, float)> method, glm::vec3 center, float radius);
+	void cuboid(float* voxels, int size, std::function<void(float*, int, int, int, int, float)> method, glm::vec3 center, glm::vec3 extents);
 }
 #endif
