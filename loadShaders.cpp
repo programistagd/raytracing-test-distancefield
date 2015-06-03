@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <GL/glew.h>
 #include <fstream>
 #include <string>
@@ -29,6 +30,8 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
         FragmentShaderStream.close();
     }
 
+	//printf("'%s'\n\n'%s'\n", VertexShaderCode.c_str(), FragmentShaderCode.c_str());
+
     GLint Result = GL_FALSE;
     int InfoLogLength;
 
@@ -46,6 +49,14 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
     glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
     fprintf(stdout, "%s\n", &VertexShaderErrorMessage[0]);
 
+	GLint isCompiled = 0;
+	glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		glDeleteShader(VertexShaderID);
+		throw std::string("Vertex shader not compiled!");
+	}
+
     // Compile Fragment Shader
     printf("Compiling shader : %s\n", fragment_file_path);
     char const * FragmentSourcePointer = FragmentShaderCode.c_str();
@@ -58,6 +69,14 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
     std::vector<char> FragmentShaderErrorMessage(InfoLogLength);
     glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
     fprintf(stdout, "%s\n", &FragmentShaderErrorMessage[0]);
+
+	isCompiled = 0;
+	glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)
+	{
+		glDeleteShader(FragmentShaderID);
+		throw std::string("Fragment shader not compiled!");
+	}
 
     // Link the program
     fprintf(stdout, "Linking program\n");
@@ -75,6 +94,5 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
 
     glDeleteShader(VertexShaderID);
     glDeleteShader(FragmentShaderID);
-
     return ProgramID;
 }

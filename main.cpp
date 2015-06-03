@@ -1,4 +1,4 @@
-#include "config.h"
+
 #include <GL/glew.h>
 #include <iostream>
 #include <SFML/Window.hpp>
@@ -10,7 +10,7 @@
 
 sf::Font globalFont;
 
-sf::String toString(float f){
+template<class T> sf::String toString(T f){
 	std::ostringstream os;
 	os<<f;
 	return os.str();
@@ -20,10 +20,10 @@ bool running = true;
 std::string globalError;
 
 int main(int argc, char* argv[]) {
-	std::cout << "Distancefield Ray Tracer\nVersion " << raytrace_df_VERSION_MAJOR << "." << raytrace_df_VERSION_MINOR << "\n";
-
+	std::cout << "Distancefield Ray Tracer\n";
+	try{
 	if(!globalFont.loadFromFile("FreeSans.ttf")){
-		throw "Font!";
+		throw std::string("Font!");
 	}
 
 	sf::ContextSettings ctx;
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 	bool shouldDraw=true;
 	sf::Clock clock;
 	sf::Clock renderTimer;
-	float latency=0;
+	int latency=0;
 	sf::Text latencyText;
 	latencyText.setFont(globalFont);
 	latencyText.setColor(sf::Color::White);
@@ -66,10 +66,13 @@ int main(int argc, char* argv[]) {
 	glClearColor(0.f,0.f,0.3f,1.0f);
 
 	//initialize components
-	try{
 	RayTracer raytracer;
-	Volumes::sphere(raytracer.voxels,128,glm::vec3(64,64,64),55.0);
-	raytracer.refresh();
+	{
+		//Prepare volume
+		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(64, 64, 64), 20.0);
+		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(80, 80, 64), 10.0);
+		raytracer.refresh();
+	}
 
 	//start loop
 	while (running && window.isOpen()) {
@@ -120,6 +123,8 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	if (window.isOpen())	window.close();
+
 	}
 	catch(std::string err){
 		std::cerr<<"Error: "<<err<<std::endl;
@@ -127,7 +132,5 @@ int main(int argc, char* argv[]) {
 	/*catch(...){
 		std::cerr<<"Unknown exception"<<std::endl;
 	}*/
-
-	if(window.isOpen())	window.close();
 	std::cout<<"Quitted gracefully\n";
 }

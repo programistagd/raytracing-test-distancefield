@@ -1,13 +1,13 @@
 #include <GL/glew.h>
 #include "RayTracer.hpp"
 #define  GLM_FORCE_RADIANS
-#include <glm/ext.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path);
 
 RayTracer::RayTracer(){
    voxels = new float[128*128*128];
-   //for(int i=0;i<128*128*128;++i) voxels[i]=(i%40)/80.0f+40.0f;//filling voxels in main
+   for (int i = 0; i < 128 * 128 * 128; ++i) voxels[i] = 1000000.0f;
 
    shader = LoadShaders("vertex.glsl","fragment.glsl");
    player.direction = glm::vec3(cos(player.angles.y)*sin(player.angles.x),sin(player.angles.y),cos(player.angles.y)*cos(player.angles.x));
@@ -40,11 +40,11 @@ RayTracer::RayTracer(){
    glBindTexture(GL_TEXTURE_3D, texture3d);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+   //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
    refresh();//TODO may not be called but a call has to be guaranteed before first render call (probably)
-
+   
 }
 
 void RayTracer::refresh(){
@@ -67,7 +67,7 @@ void RayTracer::render(){
 
    glm::mat4 viewMatrix = glm::lookAt(
       glm::vec3(0,0,0),//player.pos,           // Camera is here
-      /*player.pos+*/player.direction, // and looks here : at the same position, plus "direction"
+      player.direction, // and looks here : at the same position, plus "direction"
       player.up                  // Head is up (set to 0,-1,0 to look upside-down)
    );
 
@@ -101,13 +101,14 @@ void RayTracer::update(sf::Window& window){
    float dt = 1.0f/60.0f;
    sf::Vector2i mouse = sf::Mouse::getPosition(window);
    sf::Mouse::setPosition(sf::Vector2i(800/2,600/2),window);
-   player.angles.x-=1.0*dt*float(800/2-mouse.x);
-   player.angles.y+=1.0*dt*float(600/2-mouse.y);
+   player.angles.x-=1.0f*dt*float(800/2-mouse.x);
+   player.angles.y+=1.0f*dt*float(600/2-mouse.y);
    player.direction = glm::vec3(cos(player.angles.y)*sin(player.angles.x),sin(player.angles.y),cos(player.angles.y)*cos(player.angles.x));
    player.right = glm::vec3(sin(player.angles.x - 3.14f/2.0f),0,cos(player.angles.x - 3.14f/2.0f));
    player.up = glm::cross( player.right, player.direction );
 
    player.pos += player.direction*(player.speedFactor*player.speed.y*dt)+player.right*(player.speedFactor*player.speed.x*dt);
+   
 }
 
 void RayTracer::event(sf::Event evt){

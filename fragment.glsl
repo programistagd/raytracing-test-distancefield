@@ -6,6 +6,8 @@ uniform mat4 matrix;
 in vec3 outray;
 out vec4 color;
 
+#define DEBUG
+
 struct Intersection{
       float t;
       vec3 pos;
@@ -81,7 +83,9 @@ vec3 castRay(Ray ray){
          coord+=ray.dir*dist/128.0;
          steps++;
       }
-      color=vec3(0,0,steps/100.0);
+      #ifdef DEBUG
+        color=vec3(0,0,steps/100.0);
+      #endif
       if(insideAABB(vec3(0,0,0),vec3(1,1,1),coord) && texture(VolumeTexture,coord).r<=0.1){
          color = vec3(1,0,0);
       }
