@@ -15,6 +15,8 @@ public:
    float * voxels;
    void refresh();
 
+   void setViewport(int x, int y);
+
    ~RayTracer();
 protected:
    GLuint texture3d;
@@ -30,6 +32,7 @@ protected:
       glm::vec3 direction,right,up;
       glm::vec2 angles;
    } player;
+   glm::vec2 viewport;
 };
 
 #endif

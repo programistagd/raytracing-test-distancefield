@@ -60,11 +60,18 @@ void RayTracer::setVec3(const char* name, glm::vec3 vec){
    glUniform3f(id,vec.x,vec.y,vec.z);
 }
 
-#include <iostream>
+void RayTracer::setViewport(int x, int y){
+	viewport = glm::vec2(x, y);
+}
+
 void RayTracer::render(){
    glUseProgram(shader);
-   setVec3("eyePos",player.pos);
-
+   setVec3("eyePos", player.pos);
+   {
+	   GLuint id = glGetUniformLocation(shader, "WindowSize");
+	   glUniform2f(id, viewport.x, viewport.y);
+   }
+ 
    glm::mat4 viewMatrix = glm::lookAt(
       glm::vec3(0,0,0),//player.pos,           // Camera is here
       player.direction, // and looks here : at the same position, plus "direction"

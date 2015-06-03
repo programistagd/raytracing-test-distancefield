@@ -2,11 +2,18 @@
 uniform sampler3D VolumeTexture;
 uniform vec3 eyePos;
 uniform mat4 matrix;
+
+uniform vec2 WindowSize;
 //uniform vec3 eyeDir
 in vec3 outray;
 out vec4 color;
 
 #define DEBUG
+
+const float epsilonTolerance = 0.01;
+const float epsilonMove = 0.001;
+const float epsilonGradient = 0.5/128.0;
+const int maxRays = 200;
 
 struct Intersection{
       float t;
@@ -66,35 +73,53 @@ Intersection intersectAABB(vec3 lb,vec3 rt,Ray r){
    return Intersection(tmin,point,vec3(0),vec3(0,1,0),0.0);
 }
 
+vec3 computeNormal(vec3 coord){
+  vec3 normal;
+  normal.x = texture(VolumeTexture,coord+vec3(epsilonGradient,0,0)).r-texture(VolumeTexture,coord-vec3(epsilonGradient,0,0)).r;
+  normal.y = texture(VolumeTexture,coord+vec3(0,epsilonGradient,0)).r-texture(VolumeTexture,coord-vec3(0,epsilonGradient,0)).r;
+  normal.z = texture(VolumeTexture,coord+vec3(0,0,epsilonGradient)).r-texture(VolumeTexture,coord-vec3(0,0,epsilonGradient)).r;
+  return normalize(normal);
+}
 
 vec3 castRay(Ray ray){
    vec3 corner = vec3(0,0,0);
-   vec3 lightPosition = vec3(-50.0,40.0,70.0);//TODO uniform
+   vec3 lightPosition = eyePos;//vec3(-50.0,40.0,70.0);//TODO uniform
    vec3 color=vec3(0);
    Intersection intersection = intersectAABB(vec3(0,0,0),vec3(128,128,128),ray);
    if(intersection.t>=0.0){
-      vec3 coord = (intersection.pos+ray.dir*0.001-corner)/128.0;
+      vec3 coord = (intersection.pos+ray.dir*epsilonMove-corner)/128.0;
       //color = vec3(texture(VolumeTexture,coord).r);
       int steps=0;
-      while(steps<100
+      while(steps<maxRays
          && insideAABB(vec3(0,0,0),vec3(1,1,1),coord)
-         && abs(texture(VolumeTexture,coord).r)>0.1){//TODO coefficients
+         && abs(texture(VolumeTexture,coord).r)>epsilonTolerance){
          float dist = texture(VolumeTexture,coord).r;
          coord+=ray.dir*dist/128.0;
          steps++;
       }
       #ifdef DEBUG
-        color=vec3(0,0,steps/100.0);
+        color=vec3(0,0,5.0*steps/float(maxRays));
       #endif
-      if(insideAABB(vec3(0,0,0),vec3(1,1,1),coord) && texture(VolumeTexture,coord).r<=0.1){
-         color = vec3(1,0,0);
+      if(insideAABB(vec3(0,0,0),vec3(1,1,1),coord) && texture(VolumeTexture,coord).r<=epsilonTolerance){
+        vec3 material = vec3(1,0,0);
+        float ambient = 0.2;
+
+        vec3 normal = computeNormal(coord);
+        vec3 lightDir = normalize(lightPosition-coord*128.0);//TODO proper
+        vec3 eyeDir = normalize(eyePos);
+
+        float diffuse = max(dot(normal,lightDir),0.0);
+        /*float spec = 0.0;
+        if(diffuse>0.0){
+          vec3 h = normalize(lightDir+eyeDir);
+          spec = max(dot(h,normal),0.0);
+        }*/
+        color = max(material*diffuse,material*ambient);
+         //color = max(material*diffuse+vec3(1,1,1)*spec,material*ambient);
       }
    }
    return color;
 }
-
-
-const vec2 WindowSize = vec2(800,600);//TODO uniform
 
 void main()
 {

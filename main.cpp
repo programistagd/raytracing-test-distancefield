@@ -9,6 +9,8 @@
 #include "Volumes.hpp"
 
 sf::Font globalFont;
+const int WIDTH = 1200;
+const int HEIGHT = 1000;
 
 template<class T> sf::String toString(T f){
 	std::ostringstream os;
@@ -29,7 +31,7 @@ int main(int argc, char* argv[]) {
 	sf::ContextSettings ctx;
 	ctx.majorVersion = 3;
 	ctx.minorVersion = 3;
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Raytracer",sf::Style::Default,ctx);
+	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Raytracer", sf::Style::Default, ctx);
 	//window.setVerticalSyncEnabled(true);
 	window.setMouseCursorVisible(false);
 	GLenum err = glewInit();
@@ -72,6 +74,7 @@ int main(int argc, char* argv[]) {
 		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(64, 64, 64), 20.0);
 		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(80, 80, 64), 10.0);
 		raytracer.refresh();
+		raytracer.setViewport(WIDTH, HEIGHT);
 	}
 
 	//start loop
@@ -95,6 +98,7 @@ int main(int argc, char* argv[]) {
 				{
 					// adjust the viewport when the window is resized
 					glViewport(0, 0, event.size.width, event.size.height);
+					raytracer.setViewport(event.size.width, event.size.height);
 				}
 				raytracer.event(event);
 			}
