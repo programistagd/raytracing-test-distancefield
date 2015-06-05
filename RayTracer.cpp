@@ -68,6 +68,7 @@ void RayTracer::setViewport(int x, int y){
 void RayTracer::render(){
    glUseProgram(shader);
    setVec3("eyePos", player.pos);
+   setVec3("lightPosition", light1);
    {
 	   GLuint id = glGetUniformLocation(shader, "WindowSize");
 	   glUniform2f(id, viewport.x, viewport.y);
@@ -137,6 +138,9 @@ void RayTracer::event(sf::Event evt){
          case sf::Keyboard::LShift:
          player.speedFactor=player.fastSpeed;
          break;
+		 case sf::Keyboard::L:
+			 light1 = player.pos;
+		 break;
       }
    }
    else if(evt.type==sf::Event::KeyReleased){

@@ -11,6 +11,7 @@ in vec3 outray;
 out vec4 color;
 
 #define DEBUG
+#define LOCAL_SHADOWS
 
 const float epsilonTolerance = 0.01;
 const float epsilonMove = 0.0001;
@@ -144,6 +145,16 @@ void main()
 
    vec3 material = vec3(1,0,0);
    float ambient = 0.2;
+
+   #ifdef LOCAL_SHADOWS
+      vec3 shadowRay = lightPosition-intersection.pos;
+      vec3 shadowDir = normalize(shadowRay);
+      Intersection shadow = castRay(Ray(intersection.pos+shadowDir*0.3,shadowDir));
+      if(shadow.t>0.0 && shadow.t<length(shadowRay)){//there was something in between point and light
+          color = vec4(material*ambient,1.0);//only ambient light in that case, because object is occluded
+          return;
+      }
+   #endif
 
    vec3 lightDir = normalize(lightPosition-intersection.pos);
    vec3 eyeDir = normalize(eyePos);

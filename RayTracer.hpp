@@ -33,6 +33,7 @@ protected:
       glm::vec2 angles;
    } player;
    glm::vec2 viewport;
+   glm::vec3 light1 = glm::vec3(-40, -50, 100);
 };
 
 #endif
