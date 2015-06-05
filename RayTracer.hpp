@@ -2,7 +2,16 @@
 #define RAYTRACER_HPP
 
 #include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
 #include <glm/glm.hpp>
+
+struct Color{
+	uint8_t r, g, b;
+	inline operator bool(){
+		if (r == 255 && g == 0 && b == 255) return false;
+		return true;
+	}
+};
 
 class RayTracer{
 public:
@@ -13,13 +22,16 @@ public:
    void render();
 
    float * voxels;
+   Color * colors;
    void refresh();
 
    void setViewport(int x, int y);
 
    ~RayTracer();
 protected:
-   GLuint texture3d;
+   GLuint sdfTexture;
+   GLuint colorTexture;
+   GLuint featureTexture;
    GLuint shader;
    GLuint vertexbuffer;
    void setVec3(const char* name, glm::vec3 vec);

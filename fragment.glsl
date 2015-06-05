@@ -1,5 +1,6 @@
 #version 330 core
 uniform sampler3D VolumeTexture;
+uniform sampler3D ColorsTexture;
 uniform vec3 eyePos;
 uniform mat4 matrix;
 
@@ -143,7 +144,8 @@ void main()
       discard;
    }
 
-   vec3 material = vec3(1,0,0);
+   //texelFetch(ColorsTexture, ivec3(intersection.pos-chunkPos),0).rgb; //if you use this one there's no interpolation and sphere can not expand its colors to up to 2 voxels
+   vec3 material = texture(ColorsTexture, (intersection.pos-chunkPos)/chunkScale).rgb;
    float ambient = 0.2;
 
    #ifdef LOCAL_SHADOWS

@@ -71,12 +71,16 @@ int main(int argc, char* argv[]) {
 	RayTracer raytracer;
 	{
 		//Prepare volume
-		Volumes::cuboid(raytracer.voxels, 128, &Volumes::add, glm::vec3(40, 50, 30), glm::vec3(18, 18, 18));
-		Volumes::sphere(raytracer.voxels, 128, &Volumes::add, glm::vec3(64, 64, 64), 24.0);
-		Volumes::sphere(raytracer.voxels, 128, &Volumes::remove, glm::vec3(80, 80, 64), 20.0);
+		std::cout << "Computing SDF\n";//TODO maybe load from file??
+		Volumes::cuboid(raytracer, 128, &Volumes::add, glm::vec3(40, 50, 30), glm::vec3(18, 18, 18),glm::vec3(1,0,0));
+		Volumes::sphere(raytracer, 128, &Volumes::add, glm::vec3(64, 64, 64), 24.0, glm::vec3(0, 1, 0));
+		Volumes::sphere(raytracer, 128, &Volumes::remove, glm::vec3(80, 80, 64), 20.0, glm::vec3(1, 0, 1));//TODO possibly dont set color while removing?
+		Volumes::sphere(raytracer, 128, &Volumes::add, glm::vec3(10, 10, 10), 3.0, glm::vec3(0.7, 0, 0.7));
+		Volumes::sphere(raytracer, 128, &Volumes::add, glm::vec3(10, 20, 10), 1.0, glm::vec3(0.7, 0, 0.7));
 		raytracer.refresh();
 		raytracer.setViewport(WIDTH, HEIGHT);
 	}
+	std::cout << "Starting rendering\n";
 
 	//start loop
 	while (running && window.isOpen()) {

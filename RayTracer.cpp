@@ -5,9 +5,22 @@
 
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path);
 
+#include <iostream>
+inline std::string errToStr(GLenum err){
+	switch (err){
+	case GL_INVALID_ENUM:	return "Invalid enum";
+	case GL_INVALID_VALUE:	return "Invalid value";
+	case GL_INVALID_OPERATION:	return "Invalid operation";
+	default: return "Unknown error";
+	}
+}
+#define DEBUG { GLenum err = glGetError(); if(err!=GL_NO_ERROR) std::cerr<<"OpenGL("<<__LINE__<<") - "<<errToStr(err)<<std::endl;}
+
 RayTracer::RayTracer(){
    voxels = new float[128*128*128];
    for (int i = 0; i < 128 * 128 * 128; ++i) voxels[i] = 1000000.0f;
+   colors = new Color[128 * 128 * 128];
+   for (int i = 0; i < 128 * 128 * 128; ++i) colors[i] = { 0, 0, 0 };
 
    shader = LoadShaders("vertex.glsl","fragment.glsl");
    player.direction = glm::vec3(cos(player.angles.y)*sin(player.angles.x),sin(player.angles.y),cos(player.angles.y)*cos(player.angles.x));
@@ -36,21 +49,34 @@ RayTracer::RayTracer(){
 
    //prep texture
    glEnable(GL_TEXTURE_3D);
-   glGenTextures(1, &texture3d);
-   glBindTexture(GL_TEXTURE_3D, texture3d);
+   glGenTextures(1, &sdfTexture);
+   glBindTexture(GL_TEXTURE_3D, sdfTexture);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
    //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
    //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+
+   glGenTextures(1, &colorTexture);
+   glBindTexture(GL_TEXTURE_3D, colorTexture);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
    refresh();//TODO may not be called but a call has to be guaranteed before first render call (probably)
    
 }
 
 void RayTracer::refresh(){
    glEnable(GL_TEXTURE_3D);
-   glBindTexture(GL_TEXTURE_3D, texture3d);
+
+   glBindTexture(GL_TEXTURE_3D, sdfTexture);
    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 128, 128, 128, 0, GL_RED,GL_FLOAT, voxels);
+   DEBUG
+
+   glBindTexture(GL_TEXTURE_3D, colorTexture);
+   glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, 128, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, colors);
+   DEBUG
+   
    glBindTexture(GL_TEXTURE_3D, 0);
    glDisable(GL_TEXTURE_3D);
 }
@@ -84,8 +110,19 @@ void RayTracer::render(){
    GLuint viewmatid=glGetUniformLocation(shader, "matrix");
    glUniformMatrix4fv(viewmatid, 1, GL_FALSE, &viewMatrix[0][0]);
 
+   GLuint loc = glGetUniformLocation(shader, "VolumeTexture");
+   glUniform1i(loc, 0);
+   loc = glGetUniformLocation(shader, "ColorsTexture");
+   glUniform1i(loc, 1);
+
    glEnable(GL_TEXTURE_3D);
-   glBindTexture(GL_TEXTURE_3D, texture3d);
+   glActiveTexture(GL_TEXTURE0);
+   glBindTexture(GL_TEXTURE_3D, sdfTexture);
+   DEBUG
+
+   glActiveTexture(GL_TEXTURE1);
+   glBindTexture(GL_TEXTURE_3D, colorTexture);
+   DEBUG
 
    glEnableVertexAttribArray(0);
    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -101,7 +138,9 @@ void RayTracer::render(){
    glDisableVertexAttribArray(0);
    glBindVertexArray(0);
    glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glActiveTexture(GL_TEXTURE0);
    glDisable(GL_TEXTURE_3D);
+   DEBUG
 
    sf::Shader::bind(0);
 }
