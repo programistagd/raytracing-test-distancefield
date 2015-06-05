@@ -61,7 +61,8 @@ void RayTracer::setVec3(const char* name, glm::vec3 vec){
 }
 
 void RayTracer::setViewport(int x, int y){
-	viewport = glm::vec2(x, y);
+	float dim = (float)glm::max(x, y);//TODO consider moving viewport into center
+	viewport = glm::vec2(dim,dim);
 }
 
 void RayTracer::render(){

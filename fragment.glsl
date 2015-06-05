@@ -14,20 +14,21 @@ out vec4 color;
 
 const float epsilonTolerance = 0.01;
 const float epsilonMove = 0.0001;
-const float epsilonGradient = 0.5/128.0;
+const float epsilonGradient = 0.5/128.0;//quite a big component (makes edges blurry) but if it's smaller artifacts start to appear (surface becomes rough)
 const int maxRays = 200;
 
 struct Intersection{
       float t;
       vec3 pos;
       vec3 normal;
+      vec3 debug;
 };
 struct Ray{
    vec3 org;
    vec3 dir;
 };
 
-Intersection noIntersect = Intersection(-1.0,vec3(0),vec3(0));
+Intersection noIntersect = Intersection(-1.0,vec3(0),vec3(0),vec3(0));
 
 bool insideAABB(vec3 lb,vec3 rt,vec3 r){//TODO can be optimized by vector ops (+-)
    if(r.x>lb.x && r.y>lb.y && r.z>lb.z
@@ -39,7 +40,7 @@ bool insideAABB(vec3 lb,vec3 rt,vec3 r){//TODO can be optimized by vector ops (+
 
 Intersection intersectAABB(vec3 lb,vec3 rt,Ray ray){
    if(insideAABB(lb,rt,ray.org)){
-      return Intersection(0.1,ray.org,vec3(0));
+      return Intersection(0.1,ray.org,vec3(0),vec3(0));
    }
    // r.dir is unit direction vector of ray
    vec3 dirfrac;
@@ -70,7 +71,7 @@ Intersection intersectAABB(vec3 lb,vec3 rt,Ray ray){
       return noIntersect;
    }
    vec3 point = ray.org+tmin*ray.dir;
-   return Intersection(tmin,point,vec3(0));
+   return Intersection(tmin,point,vec3(0),vec3(0));
 }
 
 const vec3 chunkPos = vec3(0,0,0);
@@ -113,6 +114,9 @@ Intersection castRay(Ray ray){
         intersection.normal = computeNormal(ray.org);//may defer it to latter step as for shadow its not needed
         return intersection;
       }
+      intersection = noIntersect;
+      intersection.debug = vec3(0,0,5.0*float(steps)/float(maxRays));
+      return intersection;
    }
    return noIntersect;
 }
@@ -127,7 +131,16 @@ void main()
 
    Intersection intersection = castRay(Ray(eyePos,rayDirection));
 
-   if(intersection.t<0.0) discard;
+   if(intersection.t<0.0){
+     #ifdef DEBUG
+     if(intersection.debug!=vec3(0)){
+       color = vec4(intersection.debug,1.0);
+       return;
+     }
+     else
+     #endif
+      discard;
+   }
 
    vec3 material = vec3(1,0,0);
    float ambient = 0.2;

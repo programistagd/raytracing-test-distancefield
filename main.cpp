@@ -9,8 +9,8 @@
 #include "Volumes.hpp"
 
 sf::Font globalFont;
-const int WIDTH = 1200;
-const int HEIGHT = 1000;
+const int WIDTH = 1300;
+const int HEIGHT = 720;
 
 template<class T> sf::String toString(T f){
 	std::ostringstream os;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 			shouldDraw = true;
 		}
 		if(shouldDraw){
-			renderTimer.restart();
+			renderTimer.restart();//measure only rendering time
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			//render
@@ -122,6 +122,7 @@ int main(int argc, char* argv[]) {
 			window.popGLStates();
 			window.display();
 			latency = renderTimer.getElapsedTime().asMilliseconds();
+			//renderTimer.restart();//measure absolute FPS
 			shouldDraw = false;
 		}else{
 			sf::sleep(sf::milliseconds(1));
