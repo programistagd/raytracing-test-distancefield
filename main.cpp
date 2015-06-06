@@ -75,8 +75,7 @@ int main(int argc, char* argv[]) {
 		Volumes::cuboid(raytracer, 128, &Volumes::add, glm::vec3(40, 50, 30), glm::vec3(18, 18, 18),glm::vec3(1,0,0));
 		Volumes::sphere(raytracer, 128, &Volumes::add, glm::vec3(64, 64, 64), 24.0, glm::vec3(0, 1, 0));
 		Volumes::sphere(raytracer, 128, &Volumes::remove, glm::vec3(80, 80, 64), 20.0, glm::vec3(1, 0, 1));//TODO possibly dont set color while removing?
-		Volumes::sphere(raytracer, 128, &Volumes::add, glm::vec3(10, 10, 10), 3.0, glm::vec3(0.7, 0, 0.7));
-		Volumes::sphere(raytracer, 128, &Volumes::add, glm::vec3(10, 20, 10), 1.0, glm::vec3(0.7, 0, 0.7));
+		Volumes::sphere(raytracer, 128, &Volumes::add, glm::vec3(20, 20, 20), 8.0, glm::vec3(0.7, 0, 0.5),1);
 		raytracer.refresh();
 		raytracer.setViewport(WIDTH, HEIGHT);
 	}

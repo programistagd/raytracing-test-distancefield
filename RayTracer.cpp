@@ -21,6 +21,8 @@ RayTracer::RayTracer(){
    for (int i = 0; i < 128 * 128 * 128; ++i) voxels[i] = 1000000.0f;
    colors = new Color[128 * 128 * 128];
    for (int i = 0; i < 128 * 128 * 128; ++i) colors[i] = { 0, 0, 0 };
+   features = new uint8_t[128 * 128 * 128];
+   for (int i = 0; i < 128 * 128 * 128; ++i) features[i] = 0;
 
    shader = LoadShaders("vertex.glsl","fragment.glsl");
    player.direction = glm::vec3(cos(player.angles.y)*sin(player.angles.x),sin(player.angles.y),cos(player.angles.y)*cos(player.angles.x));
@@ -62,6 +64,11 @@ RayTracer::RayTracer(){
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+   glGenTextures(1, &featureTexture);
+   glBindTexture(GL_TEXTURE_3D, featureTexture);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
    refresh();//TODO may not be called but a call has to be guaranteed before first render call (probably)
    
 }
@@ -75,6 +82,10 @@ void RayTracer::refresh(){
 
    glBindTexture(GL_TEXTURE_3D, colorTexture);
    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB, 128, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, colors);
+   DEBUG;
+
+   glBindTexture(GL_TEXTURE_3D, featureTexture);
+   glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, 128, 128, 128, 0, GL_RED, GL_UNSIGNED_BYTE, features);
    DEBUG
    
    glBindTexture(GL_TEXTURE_3D, 0);
@@ -114,15 +125,18 @@ void RayTracer::render(){
    glUniform1i(loc, 0);
    loc = glGetUniformLocation(shader, "ColorsTexture");
    glUniform1i(loc, 1);
+   loc = glGetUniformLocation(shader, "FeatureTexture");
+   glUniform1i(loc, 2);
 
    glEnable(GL_TEXTURE_3D);
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_3D, sdfTexture);
-   DEBUG
 
    glActiveTexture(GL_TEXTURE1);
    glBindTexture(GL_TEXTURE_3D, colorTexture);
-   DEBUG
+
+   glActiveTexture(GL_TEXTURE2);
+   glBindTexture(GL_TEXTURE_3D, featureTexture);
 
    glEnableVertexAttribArray(0);
    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);

@@ -23,6 +23,7 @@ public:
 
    float * voxels;
    Color * colors;
+   uint8_t * features;
    void refresh();
 
    void setViewport(int x, int y);

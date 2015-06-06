@@ -10,8 +10,8 @@ namespace Volumes{
 	void remove(float* voxels, int size, int x, int y, int z, float value);
 
 	//Shapes
-	void sphere(RayTracer& rt, int size, std::function<void(float*, int, int, int, int, float)> method, glm::vec3 center, float radius, glm::vec3 color);
-	void cuboid(RayTracer& rt, int size, std::function<void(float*, int, int, int, int, float)> method, glm::vec3 center, glm::vec3 extents, glm::vec3 color);
+	void sphere(RayTracer& rt, int size, std::function<void(float*, int, int, int, int, float)> method, glm::vec3 center, float radius, glm::vec3 color, uint8_t feature=0);
+	void cuboid(RayTracer& rt, int size, std::function<void(float*, int, int, int, int, float)> method, glm::vec3 center, glm::vec3 extents, glm::vec3 color, uint8_t feature = 0);
 
 }
 #endif

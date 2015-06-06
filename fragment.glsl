@@ -1,6 +1,7 @@
 #version 330 core
 uniform sampler3D VolumeTexture;
 uniform sampler3D ColorsTexture;
+uniform sampler3D FeatureTexture;
 uniform vec3 eyePos;
 uniform mat4 matrix;
 
@@ -17,7 +18,7 @@ out vec4 color;
 const float epsilonTolerance = 0.01;
 const float epsilonMove = 0.0001;
 const float epsilonGradient = 0.5/128.0;//quite a big component (makes edges blurry) but if it's smaller artifacts start to appear (surface becomes rough)
-const int maxRays = 200;
+const int maxRays = 300;
 
 struct Intersection{
       float t;
@@ -79,8 +80,19 @@ Intersection intersectAABB(vec3 lb,vec3 rt,Ray ray){
 const vec3 chunkPos = vec3(0,0,0);
 const float chunkScale = 128.0;
 
+float sampleGrass(vec3 pos){
+  pos*=1.0;//density
+  vec3 c = vec3(2,1,2);
+  vec3 q = mod(pos,c)-0.5*c;
+  q.y=pos.y;
+  return length(q.xz)-0.2;
+}
+
 float sampleSDF(vec3 pos){
-  return texture(VolumeTexture,(pos-chunkPos)/chunkScale).r;
+  int feature = int(texelFetch(FeatureTexture, ivec3(pos-chunkPos), 0).r*255.0);
+  if(feature==0) return texture(VolumeTexture,(pos-chunkPos)/chunkScale).r;
+  if(feature==1) return sampleGrass(pos);
+  return 1.0f;//shouldn happen
 }
 
 vec3 computeNormal(vec3 pos){
